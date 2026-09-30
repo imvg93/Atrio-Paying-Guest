@@ -1,0 +1,29 @@
+# Secrets (only *.example files are committed)
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+*.pem
+key.properties
+google-services.json
+GoogleService-Info.plist
+
+# Local machine config
+local.properties
+.claude/settings.local.json
+
+# Build output / dependencies
+node_modules/
+dist/
+target/
+build/
+.dart_tool/
+coverage/
+
+# Logs / OS / IDE
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
