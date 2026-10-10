@@ -224,8 +224,11 @@ Suggested order:
 
 ## 9. Security notes
 
-- Real secrets live only in `backend/.env` (git-ignored). Only `.env.example`
-  is committed.
-- The Java backend reads `../backend/.env` as an optional config source. In
-  production, use real environment variables.
+- Real secrets live only in git-ignored `.env` files. Only `.env.example`
+  templates are committed; the Java template is `backend-java/.env.example`.
+- The Java backend reads `backend-java/.env` (and, as a legacy fallback,
+  `../backend/.env`) as optional config sources. In production, use real
+  environment variables and set `SPRING_PROFILES_ACTIVE=prod`.
+- OTP codes are only written to the log under the explicitly activated `local`
+  profile. Any other profile, including none, uses `DisabledSmsSender`.
 - If any key was ever shared outside this machine, rotate it.

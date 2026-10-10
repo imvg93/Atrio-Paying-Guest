@@ -13,9 +13,11 @@ import org.springframework.stereotype.Component;
  * let a production deployment accept OTP requests, return 200, and never
  * deliver a code. Failing loudly with a 503 makes the missing provider visible
  * the first time anyone tries to sign in.
+ *
+ * <p>Active for every profile except {@code local} (see {@link LoggingSmsSender}).
  */
 @Component
-@Profile("prod")
+@Profile("!local")
 @Slf4j
 public class DisabledSmsSender implements SmsSender {
 
