@@ -16,18 +16,25 @@ See `CLAUDE.md` for the full spec, architecture rules and roadmap.
 
 ## Running locally
 
-Secrets are never committed. Copy the example env file and fill in your own values:
+Secrets are never committed. Copy the example env file and fill in your own
+values (database connection, and two JWT secrets of at least 32 characters):
 
 ```
-cp backend/.env.example backend/.env
+cp backend-java/.env.example backend-java/.env
 ```
 
-**Java backend** (needs `DB_*`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` as environment variables):
+**Java backend** (Java 21; Maven is provided by the wrapper):
 
 ```
 cd backend-java
-mvn spring-boot:run
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+./mvnw verify            # tests; DB integration tests need Docker
 ```
+
+The `local` profile prints OTP codes to the console instead of sending SMS.
+Without it, OTP requests fail with `SMS_DELIVERY_UNAVAILABLE`. Deployments must
+set `SPRING_PROFILES_ACTIVE=prod` and supply every variable from
+`backend-java/.env.example` as a real environment variable.
 
 **Flutter app**:
 
@@ -35,7 +42,18 @@ mvn spring-boot:run
 cd app
 flutter pub get
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080/api/v1
+flutter analyze
+flutter test --exclude-tags golden
 ```
+
+**Android release signing:** create `app/android/key.properties` (git-ignored)
+with `storeFile`, `storePassword`, `keyAlias` and `keyPassword`. Without it,
+release builds are left unsigned. For a local `flutter run --release`, opt into
+debug signing with `ORG_GRADLE_PROJECT_debugSignRelease=true` (never publish
+such a build).
+
+CI (`.github/workflows/ci.yml`) runs the backend tests and Flutter analyze/test
+on every pull request.
 
 ## Status
 

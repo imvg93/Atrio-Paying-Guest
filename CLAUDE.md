@@ -27,13 +27,19 @@ backend — never trust the client.
 | Layer     | Choice                                              |
 | --------- | --------------------------------------------------- |
 | Mobile    | Flutter (Dart), single codebase for Android + iOS   |
-| Backend   | NestJS (TypeScript)                                 |
-| Database  | PostgreSQL with TypeORM, versioned migrations only  |
+| Backend   | Java 21 + Spring Boot 3 (`backend-java/`)           |
+| Database  | PostgreSQL; Hibernate/JPA + Flyway migrations only  |
 | Geo       | lat/lng columns + PostGIS-style distance queries    |
 | Storage   | S3-compatible object storage for photos/documents   |
 | Auth      | Phone OTP login + JWT access token + refresh token  |
 | State mgmt (Flutter) | Riverpod                                 |
 | Navigation (Flutter) | go_router with role-based redirect       |
+
+The original NestJS backend in `backend/` is **frozen legacy**: its TypeORM
+entities and migrations built the existing schema and are kept for reference
+only. Do not add code there and do not run its migration commands against a
+shared database. All backend work goes in `backend-java/`; all schema changes
+are Flyway migrations (see `docs/PROJECT_STATUS.md`).
 
 ---
 
@@ -48,17 +54,17 @@ them, even if it makes a task slightly longer.
    hard-delete rows. All default queries must filter out soft-deleted rows.
 3. **Timestamps everywhere.** Every table has `created_at` and `updated_at`
    (auto-managed).
-4. **Versioned migrations only.** TypeORM `synchronize` must be `false` in all
-   environments. Every schema change is a new migration file. Never edit an
+4. **Versioned migrations only.** Hibernate `ddl-auto` must stay `validate` in
+   all environments. Every schema change is a new Flyway migration in
+   `backend-java/src/main/resources/db/migration/`. Never edit an
    already-committed migration.
 5. **Never overwrite history.** Occupancies and payments are append-style
    records: end/close a record and create a new one; do not mutate the past.
 6. **Flexible attributes in JSONB.** `properties.amenities`, notification
    payloads, and similar open-ended data use JSONB so new options need no
    migration.
-7. **Money is stored as integer paise** (e.g., ₹8,500 → `850000`)? No — use
-   integer **rupees** only if amounts are always whole; PG rents can include
-   paise in fines, so: store all money as `BIGINT` in **paise**. Never floats.
+7. **Money is stored as `BIGINT` paise** (e.g., ₹8,500 → `850000`). Never
+   floats, never rupees.
 
 ### API
 8. **All routes under `/api/v1/`.** Breaking changes go to `/api/v2/` later;
@@ -72,21 +78,24 @@ them, even if it makes a task slightly longer.
     ```
 11. **Pagination on every list endpoint** from day one: `?page=&limit=` in,
     `{ items, page, limit, total }` out. Default limit 20, max 100.
-12. **Validation with class-validator DTOs** on every input. Global
-    `ValidationPipe` with `whitelist: true` and `forbidNonWhitelisted: true`.
-13. **Auth guards + role guards** on every non-public endpoint. Ownership
+12. **Bean Validation (`jakarta.validation`) on every request DTO.** Unknown
+    JSON fields are rejected (`fail-on-unknown-properties: true`).
+13. **Spring Security route rules + `@PreAuthorize` role checks** on every
+    non-public endpoint (deny by default). Ownership
     checks (e.g., an owner can only edit their own property) live in services,
     not controllers.
 
 ### Code structure
-14. **Backend:** one NestJS module per domain (`auth`, `users`, `properties`,
-    `rooms`, `beds`, `occupancies`, `visit-requests`, `complaints`, `reviews`).
+14. **Backend:** one package per domain under `com.atrio.pg` (`auth`, `users`,
+    `properties`, `rooms`, `beds`, `occupancies`, `visitrequests`, `complaints`,
+    `reviews`).
     Controller → Service → Repository. No business logic in controllers.
 15. **Flutter:** feature-first folders (`lib/features/<feature>/`), each with
     `data/` (API + models), `application/` (providers/state), and
     `presentation/` (screens + widgets). Shared code in `lib/core/`
     (theme, api_client, router, constants, widgets).
-16. **No secrets in code.** Backend uses `.env` (+ committed `.env.example`).
+16. **No secrets in code.** Backend uses `backend-java/.env` locally (+ committed
+    `backend-java/.env.example`) and real environment variables in production.
     Flutter uses `--dart-define` / env config, never hardcoded URLs or keys.
 17. **Small verified steps.** After each meaningful unit of work, stop and
     summarize what was created so it can be reviewed before continuing.

@@ -8,8 +8,9 @@ package com.atrio.pg.auth.sms;
  * one-class change: pick MSG91 / Twilio / Gupshup later, add an implementation,
  * and nothing in {@code OtpService} moves.
  *
- * <p>Two implementations ship today - {@link LoggingSmsSender} for development
- * and {@link DisabledSmsSender} for production - and they are selected by
+ * <p>Two implementations ship today - {@link LoggingSmsSender} for the explicit
+ * {@code local} profile and {@link DisabledSmsSender} for everything else
+ * (including no profile at all) - and they are selected by
  * profile, not by configuration, so the development one cannot be switched on
  * in production by editing a value.
  */

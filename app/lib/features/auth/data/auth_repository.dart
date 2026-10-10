@@ -4,12 +4,8 @@ import '../../../core/network/api_client.dart';
 import 'models/auth_tokens.dart';
 import 'models/user.dart';
 
-/// Talks to the auth endpoints in CLAUDE.md 6.
-///
-/// NOTE: none of these endpoints exist on the backend yet — the Java build is
-/// at Step 0 (skeleton + health only). The paths and payloads here are the
-/// contract the backend must implement; the screens can be written against
-/// them now and will work the moment Step 1 lands.
+/// Talks to the auth endpoints in CLAUDE.md 6, implemented by
+/// `backend-java` (`AuthController`, `MeController`).
 class AuthRepository {
   AuthRepository(this._api);
 

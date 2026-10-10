@@ -1,5 +1,9 @@
 # ATRIO-PG — Current State Audit
 
+> **Historical document (2026-07-24).** This audit predates the Spring Boot
+> backend and the Flutter app and no longer describes the repository. For the
+> current state see [`PROJECT_STATUS.md`](PROJECT_STATUS.md).
+
 **Audit date:** 2026-07-24
 **Audited by:** automated read-only review of the full repository + a live
 introspection of the running Supabase database.
@@ -266,7 +270,7 @@ be invention.
 ## 3. Database
 
 **Live target:** Supabase-hosted PostgreSQL, project ref
-`ljcwcjwiyeiyzgkmmbhn`, database `postgres`, schema `public`, SSL required.
+`<project-ref>`, database `postgres`, schema `public`, SSL required.
 Connection settings live in `backend/.env`; `synchronize` is hardcoded `false`
 in `typeorm.config.ts:24`.
 
@@ -838,8 +842,8 @@ array-ness). Both store URLs, so storage choice is not schema-coupled.
 
 | Aspect | Value |
 | --- | --- |
-| Provider | Supabase, project ref `ljcwcjwiyeiyzgkmmbhn` |
-| Host | `db.ljcwcjwiyeiyzgkmmbhn.supabase.co` (direct) |
+| Provider | Supabase, project ref `<project-ref>` |
+| Host | `db.<project-ref>.supabase.co` (direct) |
 | Note | Host resolves **AAAA-only (IPv6)**. Works from the current machine. Fallback if a network lacks IPv6: session pooler `aws-0-<region>.pooler.supabase.com` with username `postgres.<ref>`. |
 | Port / DB / user | `5432` / `postgres` / `postgres` |
 | SSL | `DB_SSL=true` → `{ rejectUnauthorized: false }` (`typeorm.config.ts:20-23`) |

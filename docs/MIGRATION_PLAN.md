@@ -1,5 +1,9 @@
 # ATRIO-PG — NestJS → Java Spring Boot Migration Plan
 
+> **Historical planning document (2026-07-24).** The migration it describes has
+> been carried out; `backend-java/` is now the active backend. For the current
+> state see [`PROJECT_STATUS.md`](PROJECT_STATUS.md).
+
 **Status:** DRAFT — awaiting approval. No code written.
 **Date:** 2026-07-24
 **Companion documents:** `CLAUDE.md` (project constitution),

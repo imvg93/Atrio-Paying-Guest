@@ -2,28 +2,35 @@ spring:
   application:
     name: atrio-pg-api
 
-  # Reuse the existing NestJS .env rather than duplicating credentials.
-  # Both imports are optional, so real environment variables (CI, prod) win
-  # and nothing breaks when the file is absent.
+  # Local env file: backend-java/.env (template: backend-java/.env.example).
+  # The legacy backend/.env is still read as a fallback; later imports win, so
+  # backend-java/.env takes precedence. Both are optional, so real environment
+  # variables (CI, prod) win and nothing breaks when the files are absent.
+  #
+  # There is deliberately no default profile: `local` (which logs OTP codes)
+  # must be activated explicitly, e.g. -Dspring-boot.run.profiles=local.
   config:
     import:
-      - optional:file:./.env[.properties]
       - optional:file:../backend/.env[.properties]
-
-  profiles:
-    default: local
+      - optional:file:./.env[.properties]
 
   datasource:
-    # DB_SSL=true in .env corresponds to sslmode=require here.
+    # DB_SSLMODE defaults to require (Supabase); use disable for a local
+    # docker Postgres. The legacy DB_SSL variable is not read.
     #
     # stringtype=unspecified is required, not cosmetic: enum columns are
     # Postgres named enum types, and the JPA converters bind their labels as
     # String. Postgres will not implicitly cast varchar to an enum, so the
     # driver must send the value untyped and let the server infer it.
+    #
+    # It is set as a driver property rather than only in the URL so it also
+    # applies when the URL is overridden (Testcontainers, platform configs).
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}?sslmode=${DB_SSLMODE:require}&stringtype=unspecified
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     hikari:
+      data-source-properties:
+        stringtype: unspecified
       maximum-pool-size: ${DB_POOL_MAX:10}
       pool-name: atrio-pool
 

@@ -34,7 +34,8 @@ void main() {
   );
 
   // The OTP is not delivered anywhere in development — LoggingSmsSender writes
-  // it to the backend log — so the test reads it back out of that log.
+  // it to the backend log — so the test reads it back out of that log. The
+  // backend must run with the `local` profile for that sender to be active.
   const logPath = String.fromEnvironment('BACKEND_LOG');
 
   late bool backendUp;
