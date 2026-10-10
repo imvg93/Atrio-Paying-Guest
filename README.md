@@ -48,7 +48,9 @@ flutter test --exclude-tags golden
 
 **Android release signing:** create `app/android/key.properties` (git-ignored)
 with `storeFile`, `storePassword`, `keyAlias` and `keyPassword`. Without it,
-release builds fall back to the debug key and must not be published.
+release builds are left unsigned. For a local `flutter run --release`, opt into
+debug signing with `ORG_GRADLE_PROJECT_debugSignRelease=true` (never publish
+such a build).
 
 CI (`.github/workflows/ci.yml`) runs the backend tests and Flutter analyze/test
 on every pull request.

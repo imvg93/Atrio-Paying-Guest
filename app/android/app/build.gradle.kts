@@ -11,7 +11,7 @@ plugins {
 // Release signing key, kept out of git (see android/.gitignore).
 val keystorePropertiesFile = rootProject.file("key.properties")
 val keystoreProperties = Properties().apply {
-    if (keystorePropertiesFile.exists()) load(FileInputStream(keystorePropertiesFile))
+    if (keystorePropertiesFile.exists()) FileInputStream(keystorePropertiesFile).use { load(it) }
 }
 
 android {
@@ -52,13 +52,19 @@ android {
 
     buildTypes {
         release {
-            signingConfig = if (keystorePropertiesFile.exists()) {
-                signingConfigs.getByName("release")
-            } else {
-                // Lets `flutter run --release` work locally. Never publish a
-                // build signed this way.
-                logger.warn("android/key.properties not found: release build is signed with the DEBUG key")
-                signingConfigs.getByName("debug")
+            // Fails closed: without key.properties the release build is left
+            // unsigned unless debug signing is explicitly opted into for local
+            // testing (ORG_GRADLE_PROJECT_debugSignRelease=true).
+            signingConfig = when {
+                keystorePropertiesFile.exists() -> signingConfigs.getByName("release")
+                project.findProperty("debugSignRelease") == "true" -> {
+                    logger.warn("Release build is signed with the DEBUG key (debugSignRelease=true). Do not publish it.")
+                    signingConfigs.getByName("debug")
+                }
+                else -> {
+                    logger.warn("android/key.properties not found: release build will be unsigned")
+                    null
+                }
             }
         }
     }
