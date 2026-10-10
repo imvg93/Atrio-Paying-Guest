@@ -22,10 +22,15 @@ spring:
     # Postgres named enum types, and the JPA converters bind their labels as
     # String. Postgres will not implicitly cast varchar to an enum, so the
     # driver must send the value untyped and let the server infer it.
+    #
+    # It is set as a driver property rather than only in the URL so it also
+    # applies when the URL is overridden (Testcontainers, platform configs).
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}?sslmode=${DB_SSLMODE:require}&stringtype=unspecified
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     hikari:
+      data-source-properties:
+        stringtype: unspecified
       maximum-pool-size: ${DB_POOL_MAX:10}
       pool-name: atrio-pool
 
